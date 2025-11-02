@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: workorder-api-ingress
+  namespace: workorder-api
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: workorder.lab.int
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: workorder-api-svc
+                port:
+                  number: 8080
