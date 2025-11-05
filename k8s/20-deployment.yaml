@@ -12,6 +12,16 @@ spec:
     metadata:
       labels:
         app: workorder-api
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/auth-path: "auth/kubernetes"
+        vault.hashicorp.com/role: "workorder-api"
+        vault.hashicorp.com/agent-inject-secret-db-secrets.properties: "homelab/data/workorder-api"
+        vault.hashicorp.com/agent-inject-template-db-secrets.properties: |
+          {{- with secret "homelab/data/workorder-api" -}}
+          quarkus.datasource.username={{ .Data.data.db_username }}
+          quarkus.datasource.password={{ .Data.data.db_password }}
+          {{- end -}}
     spec:
       serviceAccountName: workorder-api-sa
       containers:
@@ -22,6 +32,8 @@ spec:
             - name: http
               containerPort: 8080
           env:
+            - name: QUARKUS_CONFIG_LOCATIONS
+              value: "/vault/secrets/db-secrets.properties"
             - name: HTTP_PORT
               valueFrom:
                 configMapKeyRef:
@@ -32,16 +44,6 @@ spec:
                 configMapKeyRef:
                   name: workorder-api-config
                   key: DB_JDBC_URL
-            - name: DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: workorder-api-secret
-                  key: DB_USERNAME
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: workorder-api-secret
-                  key: DB_PASSWORD
             - name: CUSTOMER_BASE_URL
               valueFrom:
                 configMapKeyRef:
