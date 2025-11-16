@@ -1,0 +1,24 @@
+name: release
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  call:
+    uses: Devops-Flow/ci-kit/.github/workflows/quarkus-native.yml@v1.0.4
+    with:
+      runner_label: arc-runner-set
+      dockerfile: ./Dockerfile.native
+      k8s_file: k8s/20-deployment.yaml
+      k8s_deploy_name: workorder-api
+      k8s_container:  workorder-api
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN:    ${{ secrets.DOCKERHUB_TOKEN }}
+      ARGOCD_SERVER:      ${{ secrets.ARGOCD_SERVER }}
+      ARGOCD_TOKEN:       ${{ secrets.ARGOCD_TOKEN }}
+      ARGOCD_APP:         ${{ secrets.ARGOCD_APP }}
